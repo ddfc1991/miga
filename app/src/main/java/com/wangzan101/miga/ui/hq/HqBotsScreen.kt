@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.wangzan101.miga.ui.theme.MikaIcons
 
 /** Bots 屏的一个 bot。 */
@@ -83,10 +84,16 @@ fun HqPebblePicker(
             ) {
                 PebbleAvatar(bot.name, Modifier.fillMaxSize())
                 if (sel) {
-                    Text(
-                        "再点打开", style = HqType.Caption, color = Color.White.copy(alpha = 0.9f),
-                        modifier = Modifier.align(Alignment.Center).offset(y = 4.dp),
-                    )
+                    Box(
+                        Modifier.align(Alignment.BottomEnd).padding(6.dp)
+                            .size(14.dp).clip(CircleShape)
+                            .background(Hq.bg.copy(alpha = 0.55f)),
+                    ) {
+                        Text(
+                            "•", color = Color.White, fontSize = 9.sp,
+                            modifier = Modifier.align(Alignment.Center),
+                        )
+                    }
                 }
             }
         }
@@ -189,7 +196,7 @@ fun HqBotsScreen(
                 else "换个关键词,或者看看有没有拼错。",
                 action = if (q.isEmpty()) "去建一个" else null,
                 onAction = if (q.isEmpty()) onManageBots else null,
-                iconBase = Hq.ink2.copy(alpha = 0.16f),
+                iconBase = Hq.ink2.copy(alpha = 0.30f),
                 iconAccent = Hq.accent,
                 titleColor = Hq.ink2,
                 descColor = Hq.ink3,

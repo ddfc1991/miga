@@ -144,7 +144,7 @@ private fun GroupChatList(
                 icon = com.wangzan101.miga.ui.kubai.KubaiIcons.Users,
                 title = "还没有群聊",
                 description = "建一个群,把几位 bot 拉进来,大家轮流接话。",
-                iconBase = c.ink3.copy(alpha = 0.18f),
+                iconBase = c.ink3.copy(alpha = 0.30f),
                 iconAccent = c.accent,
                 titleColor = c.ink,
                 descColor = c.ink3,
