@@ -177,7 +177,10 @@ class ConversationStore(
                 val id = f.nameWithoutExtension
                 val archivedAt = archivedAt(id)
                 if (!includeArchived && archivedAt != null) return@mapNotNull null
-                ConversationSummary(id, title(id) ?: first, updatedAt, pinnedAt(id), pageOrigin(id), branchOrigin(id), archivedAt, restoredAt(id), projectId(id))
+                ConversationSummary(
+                    id, title(id) ?: first, updatedAt, pinnedAt(id), pageOrigin(id), branchOrigin(id),
+                    archivedAt, restoredAt(id), projectId(id), 0, preview(f),
+                )
             }
         return (unsaved + saved).drop(offset).take(limit).toList()
     }
@@ -189,6 +192,13 @@ class ConversationStore(
 
     private data class FirstMessage(val modified: Long, val size: Long, val text: String?)
     private val firstMessages = mutableMapOf<String, FirstMessage>()
+
+    /** 最后一句用户说的话,给会话列表当副标题用(像消息 App 的那种一行预览)。 */
+    private fun preview(f: File): String {
+        if (!f.isFile || f.length() > 400_000) return ""
+        val text = read(f)?.lastOrNull { it.first.userText?.isNotBlank() == true }?.first?.userText ?: return ""
+        return text.replace('\n', ' ').trim().take(60)
+    }
 
     private fun firstMessage(f: File): String? {
         if (!f.isFile) return null
@@ -807,6 +817,8 @@ data class ConversationSummary(
     val projectId: String? = null,
     /** 这个对话已有的轮数;只读控制台查询时填,普通列表为 0。 */
     val turnCount: Int = 0,
+    /** 最后一句用户消息的前 60 字,列表副标题用。 */
+    val preview: String = "",
 )
 
 /** 对话用的人格和切换记录;人格本身在 PersonaStore 里,这里只存 id。 */

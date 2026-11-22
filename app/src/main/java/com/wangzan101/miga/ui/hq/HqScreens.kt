@@ -157,7 +157,10 @@ private fun HqSessionRow(s: ConversationSummary, onClick: () -> Unit = {}, onDel
                 Text(timeLabel(s.updatedAt), style = HqType.Caption, color = Hq.ink3)
             }
             Spacer(Modifier.height(2.dp))
-            Text("点击打开", style = HqType.Caption, color = Hq.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(
+                s.preview.ifBlank { "还没说过话" },
+                style = HqType.Caption, color = Hq.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            )
         }
         Spacer(Modifier.width(8.dp))
         Icon(MikaIcons.More, null, tint = Hq.ink2, modifier = Modifier.size(16.dp).clickable { onDelete() })
