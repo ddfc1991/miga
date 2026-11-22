@@ -141,6 +141,27 @@ private fun GroupMembersView(
     Page("成员管理 · ${group.name}", onBack) {
         GroupLabel("组内模型")
         GroupCard {
+            // 组内自动切换策略（Mibot 那套：fallback 按序 / loadBalance 轮询）
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("自动切换", style = MikaType.Body)
+                    Text(if (group.strategy == "loadBalance") "轮询：每次调用轮流用组内模型" else "按序：失败才换下一个",
+                        style = MikaType.Caption, color = c.ink2)
+                }
+                TextButton(onClick = { store.setStrategy(group.id, "fallback") }) {
+                    Text("按序", color = if (group.strategy == "fallback") c.accent else c.ink3)
+                }
+                TextButton(onClick = { store.setStrategy(group.id, "loadBalance") }) {
+                    Text("轮询", color = if (group.strategy == "loadBalance") c.accent else c.ink3)
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        GroupLabel("组内模型")
+        GroupCard {
             if (group.members.isEmpty()) {
                 FooterNote("还没有成员。点下面添加,从已连接的服务商模型里选。")
             } else {

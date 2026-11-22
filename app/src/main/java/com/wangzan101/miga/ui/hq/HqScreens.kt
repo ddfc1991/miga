@@ -286,9 +286,8 @@ fun HqKanbanScreen(tasks: List<TaskRun> = emptyList(), onOpenTask: (TaskRun) -> 
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
 /** 动态屏：Muse 信息茧房——agent 按你关注的社交/信源生成的分组帖子流。 */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HqFeedScreen(
     posts: List<FeedPost> = emptyList(),

@@ -16,12 +16,14 @@ data class ModelGroupMember(
     val modelId: String,
 )
 
-/** 模型组:名字 + 一组模型(成员)。 */
+/** 模型组:名字 + 一组模型(成员)。strategy 决定组内自动切换(Mibot 那套):fallback 按序尝试 / loadBalance 轮询。 */
 @Serializable
 data class ModelGroup(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
     val members: List<ModelGroupMember> = emptyList(),
+    /** fallback(按顺序,失败才换) | loadBalance(每次调用轮询) */
+    val strategy: String = "fallback",
     val createdAt: Long = System.currentTimeMillis(),
 )
 
@@ -62,6 +64,11 @@ class ModelGroupStore(private val dir: File) {
 
     @Synchronized fun setMembers(id: String, members: List<ModelGroupMember>) {
         _groups.value = _groups.value.map { if (it.id == id) it.copy(members = members) else it }
+        persist()
+    }
+
+    @Synchronized fun setStrategy(id: String, strategy: String) {
+        _groups.value = _groups.value.map { if (it.id == id) it.copy(strategy = strategy) else it }
         persist()
     }
 }
