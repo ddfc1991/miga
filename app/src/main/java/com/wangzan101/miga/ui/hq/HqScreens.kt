@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.wangzan101.miga.ui.theme.MikaIcons
 import com.wangzan101.miga.chat.ConversationSummary
-import com.wangzan101.miga.record.RunSummary
+import com.wangzan101.miga.core.record.RunSummary
 import com.wangzan101.miga.task.TaskRun
 
 /** Sessions 屏：Miga 真实会话列表（长按/⋯ 删除，溶解动效）。 */

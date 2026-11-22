@@ -24,7 +24,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 import com.wangzan101.miga.chat.ConversationSummary
-import com.wangzan101.miga.record.RunSummary
+import com.wangzan101.miga.core.record.RunSummary
 import com.wangzan101.miga.task.TaskRun
 
 /**
