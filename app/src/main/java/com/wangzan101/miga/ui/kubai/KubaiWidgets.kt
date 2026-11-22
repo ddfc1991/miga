@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 
 /**
  * 双色面性图标(Kubai 2.0):主体用 [base] 浅色,点缀用 [accent] 主色。
- * viewport 为 16×16,由 icons-duotone/*.json 转换而来。
+ * viewport 为 16×16,由 kubai-icons 的 icons-duotone 目录转换而来。
  */
 @Composable
 fun KubaiIcon(
