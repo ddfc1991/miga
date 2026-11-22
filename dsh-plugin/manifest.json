@@ -11,7 +11,7 @@
   "skills": [
     {
       "name": "dsh-purge",
-      "path": "skills/dsh-purge/SKILL.md",
+      "path": "skills/dsh-purge",
       "display": "破甲人格 (dsh-purge)"
     }
   ],
