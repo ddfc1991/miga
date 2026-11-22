@@ -190,24 +190,35 @@ class ConversationStore(
     fun listForConsole(limit: Int): List<ConversationSummary> =
         listPage(0, limit).map { s -> s.copy(turnCount = read(file(s.id))?.size ?: 0) }
 
-    private data class FirstMessage(val modified: Long, val size: Long, val text: String?)
+    private data class FirstMessage(
+        val modified: Long,
+        val size: Long,
+        val text: String?,
+        val preview: String,
+    )
+
     private val firstMessages = mutableMapOf<String, FirstMessage>()
 
     /** 最后一句用户说的话,给会话列表当副标题用(像消息 App 的那种一行预览)。 */
-    private fun preview(f: File): String {
-        if (!f.isFile || f.length() > 400_000) return ""
-        val text = read(f)?.lastOrNull { it.first.userText?.isNotBlank() == true }?.first?.userText ?: return ""
-        return text.replace('\n', ' ').trim().take(60)
-    }
+    private fun preview(f: File): String = load(f)?.preview.orEmpty()
 
-    private fun firstMessage(f: File): String? {
+    private fun firstMessage(f: File): String? = load(f)?.text
+
+    /** 每个对话文件只解析一次:首句、副标题预览一起缓存,列表滚动时不重复读盘。 */
+    private fun load(f: File): FirstMessage? {
         if (!f.isFile) return null
         val modified = f.lastModified()
         val size = f.length()
-        firstMessages[f.name]?.let { if (it.modified == modified && it.size == size) return it.text }
-        val text = read(f)?.firstOrNull()?.first?.userText
-        firstMessages[f.name] = FirstMessage(modified, size, text)
-        return text
+        firstMessages[f.name]?.let { if (it.modified == modified && it.size == size) return it }
+        val turns = read(f)
+        val seen = turns?.lastOrNull { it.first.userText?.isNotBlank() == true }?.first?.userText
+        val record = FirstMessage(
+            modified, size,
+            turns?.firstOrNull()?.first?.userText,
+            seen?.replace('\n', ' ')?.trim()?.take(60).orEmpty(),
+        )
+        firstMessages[f.name] = record
+        return record
     }
 
     /** 对话起好的标题(见 [ConversationTitler]);没有、读不到为 null。标题放在对话文件旁边的 `.title` 文件里,不动对话文件的格式。 */
