@@ -279,7 +279,10 @@ fun ModelSetupScreen(
         else -> {
             if (ui.chatGptWelcome) ChatGptWelcome(vm::dismissChatGptWelcome)
             BackHandler(onBack = onBack)
-            ModelSetupContent(ui, onboarding, actions, onBack)
+            ModelSetupContent(ui, onboarding, actions, onBack,
+                groups = groups,
+                onPickGroup = { g -> vm.useGroup(ModelRole.Main, g) },
+            )
         }
     }
 
@@ -353,7 +356,10 @@ class ModelSetupActions(
  * 所以设置里进来只有返回;上手时底部留「下一步」,键盘弹出时藏起来,把地方让给表单。
  */
 @Composable
-fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetupActions, onBack: () -> Unit) {
+fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetupActions, onBack: () -> Unit,
+    groups: List<ModelGroup> = emptyList(),
+    onPickGroup: (ModelGroup) -> Unit = {},
+) {
     val c = MikaTheme.colors
     // 表单收起(测试通过存好了,或取消)后页面上没有要打字的地方,顺手收起键盘
     val focus = LocalFocusManager.current
@@ -404,8 +410,8 @@ fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetup
                     }
                     RolesSection(ui, onPick, actions.setReasoningEffort, actions.setModelContext)
                     ModelGroupPickCard(
-                        groups = groups.collectAsState().value,
-                        onPickGroup = { g -> vm.useGroup(ModelRole.Main, g) },
+                        groups = groups,
+                        onPickGroup = onPickGroup,
                     )
                     SpeechVoiceSection(ui, actions.openSpeech, actions.openVoice)
                     ImageModelSection(ui, actions.openImage)

@@ -1,28 +1,28 @@
 {
-  "total_count": 28,
+  "total_count": 29,
   "workflow_runs": [
     {
-      "id": 44997344416,
+      "id": 44998151562,
       "name": "CI",
-      "node_id": "WFR_kwLOV3HLR88AAAAKegz8oA",
+      "node_id": "WFR_kwLOV3HLR88AAAAKehlNig",
       "head_branch": "main",
-      "head_sha": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
+      "head_sha": "9e739598c093db840b8d1c319c31d823e42b59fa",
       "path": ".github/workflows/ci.yml",
-      "display_title": "fix(models): 主模型选组——补 ModelGroupPickCard 组件 + 修调用(app 注入而非 context/vm…",
-      "run_number": 27,
+      "display_title": "fix(models): 主模型选组——ModelGroupPickCard 移到 RolesSection 外层(vm 作用域内) + …",
+      "run_number": 28,
       "event": "push",
       "status": "completed",
       "conclusion": "failure",
       "workflow_id": 426411056,
-      "check_suite_id": 121777483400,
-      "check_suite_node_id": "CS_kwDOV3HLR88AAAAcWoDuiA",
-      "url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416",
-      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44997344416",
+      "check_suite_id": 121779544695,
+      "check_suite_node_id": "CS_kwDOV3HLR88AAAAcWqBidw",
+      "url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562",
+      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44998151562",
       "pull_requests": [
 
       ],
-      "created_at": "2026-11-22T07:14:48Z",
-      "updated_at": "2026-11-22T07:20:29Z",
+      "created_at": "2026-11-22T07:25:15Z",
+      "updated_at": "2026-11-22T07:31:04Z",
       "actor": {
         "login": "ddfc1991",
         "id": 192767030,
@@ -48,7 +48,7 @@
       "referenced_workflows": [
 
       ],
-      "run_started_at": "2026-11-22T07:14:48Z",
+      "run_started_at": "2026-11-22T07:25:15Z",
       "triggering_actor": {
         "login": "ddfc1991",
         "id": 192767030,
@@ -70,19 +70,19 @@
         "user_view_type": "public",
         "site_admin": false
       },
-      "jobs_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416/jobs",
-      "logs_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416/logs",
-      "check_suite_url": "https://api.github.com/repos/ddfc1991/miga/check-suites/121777483400",
-      "artifacts_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416/artifacts",
-      "cancel_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416/cancel",
-      "rerun_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416/rerun",
+      "jobs_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562/jobs",
+      "logs_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562/logs",
+      "check_suite_url": "https://api.github.com/repos/ddfc1991/miga/check-suites/121779544695",
+      "artifacts_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562/artifacts",
+      "cancel_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562/cancel",
+      "rerun_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44998151562/rerun",
       "previous_attempt_url": null,
       "workflow_url": "https://api.github.com/repos/ddfc1991/miga/actions/workflows/426411056",
       "head_commit": {
-        "id": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
-        "tree_id": "9557bdc58faf8ad0fa1684a565ceaf19838022e4",
-        "message": "fix(models): 主模型选组——补 ModelGroupPickCard 组件 + 修调用(app 注入而非 context/vm 参数)",
-        "timestamp": "2026-11-22T07:14:43Z",
+        "id": "9e739598c093db840b8d1c319c31d823e42b59fa",
+        "tree_id": "620036a67e08e4f9731376056b0d2c8960223d8d",
+        "message": "fix(models): 主模型选组——ModelGroupPickCard 移到 RolesSection 外层(vm 作用域内) + ModelSetupScreen 加 groups/onPickGroup 参数",
+        "timestamp": "2026-11-22T07:25:10Z",
         "author": {
           "name": "ddfc1991",
           "email": "miga@ddfc1991.dev"
