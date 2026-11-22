@@ -101,6 +101,7 @@ fun HqMoreScreen(
         HqMenuGroup("消息与数据", listOf(
             HqMoreEntry("messaging", "消息", MikaIcons.Message, Hq.ok),
             HqMoreEntry("groupchats", "群聊", MikaIcons.Route, Color(0xFF40C8E0)),
+            HqMoreEntry("voice", "语音模型", MikaIcons.Message, Color(0xFF32D74B)),
             HqMoreEntry("files", "文件库", MikaIcons.Folder, Hq.accent),
             HqMoreEntry("memory", "记忆", MikaIcons.Spark, Color(0xFFBF5AF2)),
             HqMoreEntry("usage", "用量", MikaIcons.Chart, Hq.ok),

@@ -652,6 +652,7 @@ private fun MikaRoot(
                         "vault" -> nav.push(Route.Vault)
                         "messaging" -> nav.reset()
                         "groupchats" -> nav.push(Route.GroupChats)
+                        "voice" -> nav.push(Route.SpeechModel)
                         "files" -> { filesFromDrawer = false; filesConversation = app.chat.ui.value.conversationId; nav.push(Route.Files) }
                         "memory" -> nav.push(Route.Memory)
                         "usage" -> nav.push(Route.Usage)
