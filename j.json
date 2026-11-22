@@ -1,0 +1,525 @@
+{
+  "total_count": 4,
+  "jobs": [
+    {
+      "id": 137131133615,
+      "run_id": 44997344416,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOV3HLR88AAAAf7acKrw",
+      "head_sha": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
+      "url": "https://api.github.com/repos/ddfc1991/miga/actions/jobs/137131133615",
+      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44997344416/job/137131133615",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-22T07:14:49Z",
+      "started_at": "2026-11-22T07:14:51Z",
+      "completed_at": "2026-11-22T07:20:28Z",
+      "name": "core (JVM)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-22T07:14:51Z",
+          "completed_at": "2026-11-22T07:14:54Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-22T07:14:54Z",
+          "completed_at": "2026-11-22T07:14:56Z"
+        },
+        {
+          "name": "Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-22T07:14:56Z",
+          "completed_at": "2026-11-22T07:14:56Z"
+        },
+        {
+          "name": "Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-22T07:14:56Z",
+          "completed_at": "2026-11-22T07:15:03Z"
+        },
+        {
+          "name": "Unit tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-22T07:15:03Z",
+          "completed_at": "2026-11-22T07:20:25Z"
+        },
+        {
+          "name": "Upload test reports",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 6,
+          "started_at": "2026-11-22T07:20:25Z",
+          "completed_at": "2026-11-22T07:20:25Z"
+        },
+        {
+          "name": "Post Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-22T07:20:25Z",
+          "completed_at": "2026-11-22T07:20:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-22T07:20:25Z",
+          "completed_at": "2026-11-22T07:20:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-22T07:20:25Z",
+          "completed_at": "2026-11-22T07:20:26Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-22T07:20:26Z",
+          "completed_at": "2026-11-22T07:20:26Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ddfc1991/miga/check-runs/137131133615",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001680,
+      "runner_name": "GitHub Actions 1000001680",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 137131133776,
+      "run_id": 44997344416,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOV3HLR88AAAAf7acLUA",
+      "head_sha": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
+      "url": "https://api.github.com/repos/ddfc1991/miga/actions/jobs/137131133776",
+      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44997344416/job/137131133776",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-22T07:14:49Z",
+      "started_at": "2026-11-22T07:14:51Z",
+      "completed_at": "2026-11-22T07:17:43Z",
+      "name": "cli (Python)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-22T07:14:52Z",
+          "completed_at": "2026-11-22T07:14:56Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-22T07:14:56Z",
+          "completed_at": "2026-11-22T07:15:01Z"
+        },
+        {
+          "name": "Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-22T07:15:01Z",
+          "completed_at": "2026-11-22T07:15:01Z"
+        },
+        {
+          "name": "Run actions/setup-python@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-22T07:15:01Z",
+          "completed_at": "2026-11-22T07:15:02Z"
+        },
+        {
+          "name": "Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-22T07:15:02Z",
+          "completed_at": "2026-11-22T07:15:11Z"
+        },
+        {
+          "name": "CLI tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-22T07:15:11Z",
+          "completed_at": "2026-11-22T07:17:36Z"
+        },
+        {
+          "name": "Translation tool tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-22T07:17:36Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Translation resource checks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Log export tool tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Upload test reports",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Post Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:37Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-22T07:17:37Z",
+          "completed_at": "2026-11-22T07:17:38Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-22T07:17:38Z",
+          "completed_at": "2026-11-22T07:17:38Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-22T07:17:38Z",
+          "completed_at": "2026-11-22T07:17:38Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ddfc1991/miga/check-runs/137131133776",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001683,
+      "runner_name": "GitHub Actions 1000001683",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 137131133783,
+      "run_id": 44997344416,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOV3HLR88AAAAf7acLVw",
+      "head_sha": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
+      "url": "https://api.github.com/repos/ddfc1991/miga/actions/jobs/137131133783",
+      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44997344416/job/137131133783",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-22T07:14:49Z",
+      "started_at": "2026-11-22T07:14:51Z",
+      "completed_at": "2026-11-22T07:17:48Z",
+      "name": "app (Android)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-22T07:14:51Z",
+          "completed_at": "2026-11-22T07:14:55Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-22T07:14:55Z",
+          "completed_at": "2026-11-22T07:14:57Z"
+        },
+        {
+          "name": "Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-22T07:14:57Z",
+          "completed_at": "2026-11-22T07:14:57Z"
+        },
+        {
+          "name": "Run android-actions/setup-android@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-22T07:14:57Z",
+          "completed_at": "2026-11-22T07:15:07Z"
+        },
+        {
+          "name": "Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-22T07:15:07Z",
+          "completed_at": "2026-11-22T07:15:12Z"
+        },
+        {
+          "name": "Fetch sherpa-onnx AAR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-22T07:15:12Z",
+          "completed_at": "2026-11-22T07:15:12Z"
+        },
+        {
+          "name": "Unit tests, debug build, and device test compilation",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 7,
+          "started_at": "2026-11-22T07:15:12Z",
+          "completed_at": "2026-11-22T07:17:43Z"
+        },
+        {
+          "name": "Upload build log",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-22T07:17:43Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Upload test reports",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Upload debug APK",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Post Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-22T07:17:45Z",
+          "completed_at": "2026-11-22T07:17:45Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ddfc1991/miga/check-runs/137131133783",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001681,
+      "runner_name": "GitHub Actions 1000001681",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 137131133814,
+      "run_id": 44997344416,
+      "workflow_name": "CI",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/ddfc1991/miga/actions/runs/44997344416",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOV3HLR88AAAAf7acLdg",
+      "head_sha": "7d93aa534d45438918b8737e3d8f0ba5880ee7f6",
+      "url": "https://api.github.com/repos/ddfc1991/miga/actions/jobs/137131133814",
+      "html_url": "https://github.com/ddfc1991/miga/actions/runs/44997344416/job/137131133814",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-22T07:14:49Z",
+      "started_at": "2026-11-22T07:14:50Z",
+      "completed_at": "2026-11-22T07:17:44Z",
+      "name": "relay (Go)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-22T07:14:51Z",
+          "completed_at": "2026-11-22T07:14:53Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-22T07:14:53Z",
+          "completed_at": "2026-11-22T07:14:55Z"
+        },
+        {
+          "name": "Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-22T07:14:55Z",
+          "completed_at": "2026-11-22T07:14:55Z"
+        },
+        {
+          "name": "Run actions/setup-go@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-22T07:14:55Z",
+          "completed_at": "2026-11-22T07:15:03Z"
+        },
+        {
+          "name": "Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-22T07:15:03Z",
+          "completed_at": "2026-11-22T07:15:10Z"
+        },
+        {
+          "name": "Relay integration test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-22T07:15:10Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Upload test reports",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Post Run gradle/actions/setup-gradle@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-22T07:17:41Z",
+          "completed_at": "2026-11-22T07:17:41Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/ddfc1991/miga/check-runs/137131133814",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000001682,
+      "runner_name": "GitHub Actions 1000001682",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

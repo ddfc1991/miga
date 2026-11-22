@@ -547,6 +547,8 @@ private fun MikaRoot(
                         goOnboarding(Onboarding.next(OnboardingStep.Model, onboardingInputs()))
                     } else nav.back()
                 },
+                groups = (app.modelGroups.groups.collectAsState().value),
+                onPickGroup = { g -> app.modelGroups.let { } },
             )
         }
         Route.Chat, Route.Personal -> screenStates.SaveableStateProvider(nav.current.name) {

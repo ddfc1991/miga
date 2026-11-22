@@ -118,6 +118,10 @@ fun ModelSetupScreen(
     onOpenUsage: (() -> Unit)? = null,
     /** 设置里打开「模型组」;上手流程不传。 */
     onOpenGroups: (() -> Unit)? = null,
+    /** 模型组列表(主模型「从模型组选」);不传则不显示该卡。 */
+    groups: List<ModelGroup> = emptyList(),
+    /** 选组后把组设为主模型用途。 */
+    onPickGroup: (ModelGroup) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -399,6 +403,10 @@ fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetup
                         }
                     }
                     RolesSection(ui, onPick, actions.setReasoningEffort, actions.setModelContext)
+                    ModelGroupPickCard(
+                        groups = groups.collectAsState().value,
+                        onPickGroup = { g -> vm.useGroup(ModelRole.Main, g) },
+                    )
                     SpeechVoiceSection(ui, actions.openSpeech, actions.openVoice)
                     ImageModelSection(ui, actions.openImage)
                     actions.openDecision?.let { openDecision ->
@@ -407,12 +415,6 @@ fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetup
                                 first = true, onClick = openDecision) { RowChevron() }
                         }
                     }
-                    // 主模型可选模型组：首成员主模型 + 其余备援 + 组策略轮询（Mibot 那套）
-                    val app = context.applicationContext as? MikaApp
-                    ModelGroupPickCard(
-                        groups = app?.modelGroups?.groups?.collectAsState()?.value.orEmpty(),
-                        onPickGroup = { g -> app?.modelGroups?.let { store -> vm.useGroup(ModelRole.Main, g) } },
-                    )
                     FallbackSection(ui, ModelRole.Main, actions.pickRoleFallback, actions.toggleMainLoadBalance)
                     FallbackSection(ui, ModelRole.Vision, actions.pickRoleFallback)
                     FallbackSection(ui, ModelRole.Light, actions.pickRoleFallback)
