@@ -57,7 +57,7 @@ class GroupChatStore(private val dir: File) {
 
     @Synchronized
     fun create(title: String, members: List<GroupMember>, configId: String? = null): GroupChat {
-        val name = title.trim().ifBlank { members.joinToString("、") { it.name }.ifBlank { "新群聊" } }
+        val name = title.trim().ifBlank { "新群聊" }
         val chat = GroupChat(
             title = name, members = members, configId = configId,
             createdAt = System.currentTimeMillis(),

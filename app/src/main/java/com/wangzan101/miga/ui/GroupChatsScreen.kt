@@ -129,8 +129,8 @@ private fun GroupChatList(
                     ListRow(
                         icon = MikaIcons.Chats,
                         title = g.title,
-                        subtitle = g.members.joinToString("、") { it.name }
-                            .ifBlank { "没有成员" } + " · ${g.messages.size} 条",
+                        subtitle = "${g.members.size} 位成员 · ${g.messages.size} 条消息"
+                            + (g.messages.lastOrNull()?.let { " · 最近:" + it.text.take(12) } ?: ""),
                         first = i == 0,
                         onClick = { onOpen(g.id) },
                     ) { RowChevron() }
@@ -190,13 +190,15 @@ private fun NewGroupDialog(
     var title by remember { mutableStateOf("") }
     var picked by remember { mutableStateOf(setOf<String>()) }
     var builtin by remember { mutableStateOf(personas.isEmpty()) }
+    var builtinPicked by remember { mutableStateOf(BUILTIN_MEMBERS.map { it.name }.toSet()) }
 
-    val members: List<GroupMember> = if (builtin) BUILTIN_MEMBERS else personas.filter { it.id in picked }.map {
+    val members: List<GroupMember> = if (builtin) BUILTIN_MEMBERS.filter { it.name in builtinPicked } else personas.filter { it.id in picked }.map {
         GroupMember(name = it.name, prompt = it.prompt, personaId = it.id)
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = c.fill,
         title = { Text("新建群聊") },
         text = {
             Column {
@@ -219,9 +221,27 @@ private fun NewGroupDialog(
                 Spacer(Modifier.height(MikaSpace.S8))
                 if (builtin) {
                     BUILTIN_MEMBERS.forEach { m ->
-                        Text("· ${m.name}", style = MikaType.Body, color = c.ink2)
-                        Text(m.prompt, style = MikaType.Caption, color = c.ink3)
-                        Spacer(Modifier.height(MikaSpace.S8))
+                        val on = m.name in builtinPicked
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable {
+                                    builtinPicked =
+                                        if (on) builtinPicked - m.name else builtinPicked + m.name
+                                }
+                                .padding(vertical = 6.dp),
+                        ) {
+                            Text(
+                                if (on) "✓" else "○",
+                                color = if (on) c.accent else c.ink3,
+                                modifier = Modifier.width(20.dp),
+                            )
+                            Column {
+                                Text(m.name, style = MikaType.Body, color = c.ink)
+                                Text(m.prompt, style = MikaType.Caption, color = c.ink3)
+                            }
+                        }
                     }
                 } else {
                     personas.forEach { p ->
@@ -305,7 +325,8 @@ private fun GroupChatView(
                 left = MikaIcons.Back,
                 onLeft = onBack,
                 leftLabel = "返回",
-                subtitle = chat.members.joinToString("、") { it.name }.ifBlank { "没有成员" },
+                subtitle = if (chat.members.isEmpty()) "没有成员"
+                else chat.members.joinToString("、") { it.name }.let { if (it == chat.title) "${chat.members.size} 位成员" else it },
                 right = {
                     TextButton(onClick = { settingsOpen = true }) { Text("设置", color = c.accent) }
                 },
@@ -318,7 +339,7 @@ private fun GroupChatView(
                 if (chat.messages.isEmpty()) {
                     item {
                         Text(
-                            "给这个群发第一条消息,成员会依次回你。成员:${chat.members.joinToString("、") { it.name }}",
+                            "给这个群发第一条消息,${chat.members.size} 位成员会依次回你。",
                             style = MikaType.Caption, color = c.ink3,
                             modifier = Modifier.padding(vertical = MikaSpace.S8),
                         )
@@ -394,6 +415,7 @@ private fun GroupSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = c.fill,
         title = { Text("群设置") },
         text = {
             Column(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState())) {
