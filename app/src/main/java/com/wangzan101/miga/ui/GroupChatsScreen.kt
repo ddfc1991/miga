@@ -139,7 +139,7 @@ private fun GroupChatList(
         } else {
             GroupLabel("群聊")
             Spacer(Modifier.height(MikaSpace.S16))
-            EmptyState(
+            com.wangzan101.miga.ui.kubai.EmptyState(
                 icon = com.wangzan101.miga.ui.kubai.KubaiIcons.Users,
                 title = "还没有群聊",
                 description = "建一个群,把几位 bot 拉进来,大家轮流接话。",
