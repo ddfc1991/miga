@@ -78,6 +78,15 @@ class GroupChatStore(private val dir: File) {
         save(_chats.value.map { if (it.id == id) it.copy(configId = configId) else it })
     }
 
+    /** 编辑某位成员(名字/提示词/单独模型)。 */
+    @Synchronized
+    fun setMember(id: String, index: Int, member: GroupMember) {
+        val chat = get(id) ?: return
+        if (index !in chat.members.indices) return
+        val updated = chat.members.toMutableList().also { it[index] = member }
+        save(_chats.value.map { if (it.id == id) it.copy(members = updated) else it })
+    }
+
     @Synchronized
     fun rename(id: String, title: String) {
         val name = title.trim()

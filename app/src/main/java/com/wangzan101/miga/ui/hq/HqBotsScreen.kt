@@ -153,17 +153,22 @@ fun HqBotsScreen(
         Spacer(Modifier.height(24.dp))
 
         if (botList.isEmpty()) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = HqSpace.Page, vertical = 24.dp)) {
-                Text(
-                    if (q.isEmpty()) "还没有分出的 bot" else "没有匹配「$q」的 bot",
-                    style = HqType.RowTitle, color = Hq.ink2,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    if (q.isEmpty()) "在「更多 → 人格」里建一个,它会出现在这里,点开就能单独对话。" else "换个关键词试试。",
-                    style = HqType.Body, color = Hq.ink3,
-                )
-            }
+            com.wangzan101.miga.ui.kubai.EmptyState(
+                icon = if (q.isEmpty()) com.wangzan101.miga.ui.kubai.KubaiIcons.Bot
+                else com.wangzan101.miga.ui.kubai.KubaiIcons.SearchSparkle,
+                title = if (q.isEmpty()) "还没有分出的 bot" else "没有匹配「$q」的 bot",
+                description = if (q.isEmpty())
+                    "在「更多 → 人格」里建一个,它会出现在这里,点开就能单独对话。"
+                else "换个关键词,或者看看有没有拼错。",
+                action = if (q.isEmpty()) "去建一个" else null,
+                onAction = if (q.isEmpty()) onManageBots else null,
+                iconBase = Hq.ink2.copy(alpha = 0.16f),
+                iconAccent = Hq.accent,
+                titleColor = Hq.ink2,
+                descColor = Hq.ink3,
+                actionColor = Hq.accent,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = HqSpace.Page, vertical = 20.dp),
+            )
         }
 
         // 分组列表:主智能体 + 分出的 bot

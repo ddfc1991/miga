@@ -36,6 +36,16 @@ class GroupChatStoreTest {
         assertEquals("自定义", a.create(" 自定义 ", members()).title)
     }
 
+    @Test fun setMemberEditsInPlaceAndPersists() {
+        val dir = tmp.newFolder("gm")
+        val a = store(dir)
+        val chat = a.create("t", members())
+        a.setMember(chat.id, 0, chat.members[0].copy(prompt = "新的提示词"))
+        assertEquals("新的提示词", a.get(chat.id)?.members?.get(0)?.prompt)
+        assertEquals(2, a.get(chat.id)?.members?.size)
+        assertEquals("老严", a.get(chat.id)?.members?.get(1)?.name)
+    }
+
     @Test fun appendKeepsOrderAndSurvivesReload() {
         val dir = tmp.newFolder("g3")
         val a = store(dir)

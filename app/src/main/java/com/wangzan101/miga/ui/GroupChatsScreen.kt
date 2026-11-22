@@ -138,15 +138,16 @@ private fun GroupChatList(
             }
         } else {
             GroupLabel("群聊")
-            GroupCard {
-                ListRow(
-                    icon = MikaIcons.Chats,
-                    title = "还没有群聊",
-                    subtitle = "建一个群,拉几位 bot 一起聊",
-                    first = true,
-                    onClick = { creating = true },
-                ) { RowChevron() }
-            }
+            Spacer(Modifier.height(MikaSpace.S16))
+            EmptyState(
+                icon = com.wangzan101.miga.ui.kubai.KubaiIcons.Users,
+                title = "还没有群聊",
+                description = "建一个群,把几位 bot 拉进来,大家轮流接话。",
+                iconBase = c.ink3.copy(alpha = 0.18f),
+                iconAccent = c.accent,
+                titleColor = c.ink,
+                descColor = c.ink3,
+            )
         }
         Spacer(Modifier.height(MikaSpace.S16))
         GroupCard {
@@ -411,6 +412,7 @@ private fun GroupSettingsDialog(
     val configs by (providers?.configs?.collectAsState() ?: remember { mutableStateOf(emptyList<ProviderConfig>()) })
     var title by remember(chat.id) { mutableStateOf(chat.title) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var editingIndex by remember(chat.id) { mutableStateOf(-1) }
     val current = chat.configId
 
     AlertDialog(
@@ -443,12 +445,23 @@ private fun GroupSettingsDialog(
                 }
                 Spacer(Modifier.height(MikaSpace.S16))
                 Text("成员", style = MikaType.Caption, color = c.ink3)
-                chat.members.forEach { m ->
-                    Column(Modifier.padding(vertical = 4.dp)) {
-                        Text(m.name, style = MikaType.Body, color = c.ink)
-                        if (m.prompt.isNotBlank()) Text(m.prompt, style = MikaType.Caption, color = c.ink3)
+                chat.members.forEachIndexed { idx, m ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { editingIndex = idx }
+                            .padding(vertical = 6.dp),
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(m.name, style = MikaType.Body, color = c.ink)
+                            if (m.prompt.isNotBlank()) Text(m.prompt, style = MikaType.Caption, color = c.ink3)
+                        }
+                        Text("✎ 编辑", style = MikaType.Caption, color = c.accent)
                     }
                 }
+                Text("点成员可以改它的名字和人设。", style = MikaType.Caption, color = c.ink3)
                 Spacer(Modifier.height(MikaSpace.S16))
                 TextButton(onClick = { store.clear(chat.id) }) { Text("清空消息", color = c.warn) }
                 TextButton(onClick = { confirmDelete = true }) { Text("删除群聊", color = c.bad) }
@@ -462,6 +475,58 @@ private fun GroupSettingsDialog(
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
+    )
+
+    if (editingIndex >= 0) {
+        EditMemberDialog(chat = chat, store = store, index = editingIndex, onDismiss = { editingIndex = -1 })
+    }
+}
+
+@Composable
+private fun EditMemberDialog(
+    chat: GroupChat,
+    store: GroupChatStore,
+    index: Int,
+    onDismiss: () -> Unit,
+) {
+    val c = MikaTheme.colors
+    val m = chat.members.getOrNull(index) ?: return
+    var name by remember(chat.id, index) { mutableStateOf(m.name) }
+    var prompt by remember(chat.id, index) { mutableStateOf(m.prompt) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = c.fill,
+        title = { Text("编辑「${m.name}」") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name, onValueChange = { name = it },
+                    label = { Text("名字") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(MikaSpace.S12))
+                OutlinedTextField(
+                    value = prompt, onValueChange = { prompt = it },
+                    label = { Text("提示词(人设)") }, minLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(MikaSpace.S8))
+                Text(
+                    "提示词告诉这个 bot 它是谁、怎么说话;留空就用内置人设。",
+                    style = MikaType.Caption, color = c.ink3,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                store.setMember(chat.id, index, m.copy(
+                    name = name.trim().ifBlank { m.name },
+                    prompt = prompt.trim(),
+                ))
+                onDismiss()
+            }) { Text("保存", color = c.accent) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
     )
 }
 
