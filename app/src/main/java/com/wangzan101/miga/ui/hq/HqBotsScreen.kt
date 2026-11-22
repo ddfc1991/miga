@@ -80,6 +80,7 @@ fun HqBotsScreen(
     onOpenBot: (HqBot) -> Unit,
     modifier: Modifier = Modifier,
     onManageBots: () -> Unit = {},
+    onEditBot: (HqBot) -> Unit = {},
 ) {
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
@@ -175,12 +176,15 @@ fun HqBotsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("$group · ${items.size}", style = HqType.Section, color = Hq.ink2, modifier = Modifier.weight(1f))
-                Icon(MikaIcons.Down, null, tint = Hq.ink2, modifier = Modifier.size(14.dp))
-                Spacer(Modifier.width(14.dp))
-                Icon(MikaIcons.More, null, tint = Hq.ink2, modifier = Modifier.size(16.dp))
+                if (group == "分出的 bot") {
+                    Icon(
+                        MikaIcons.Plus, "新建 bot", tint = Hq.ink2,
+                        modifier = Modifier.size(16.dp).clickable { onManageBots() },
+                    )
+                }
             }
             items.forEach { bot ->
-                HqBotRow(bot, onOpenBot)
+                HqBotRow(bot, onOpenBot, onEdit = if (bot.personaId != null) onEditBot else null)
                 Box(
                     Modifier
                         .padding(start = 44.dp, end = HqSpace.Page)
@@ -196,7 +200,12 @@ fun HqBotsScreen(
 
 /** 列表项：blob 28dp + 标题 + 右上时间 + 摘要 2 行 + 行尾 ⋯。 */
 @Composable
-fun HqBotRow(bot: HqBot, onOpen: (HqBot) -> Unit, modifier: Modifier = Modifier) {
+fun HqBotRow(
+    bot: HqBot,
+    onOpen: (HqBot) -> Unit,
+    modifier: Modifier = Modifier,
+    onEdit: ((HqBot) -> Unit)? = null,
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -214,7 +223,12 @@ fun HqBotRow(bot: HqBot, onOpen: (HqBot) -> Unit, modifier: Modifier = Modifier)
             Spacer(Modifier.height(2.dp))
             Text(bot.summary, style = HqType.Body, color = Hq.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
-        Spacer(Modifier.width(8.dp))
-        Icon(MikaIcons.More, null, tint = Hq.ink2, modifier = Modifier.size(16.dp))
+        if (onEdit != null) {
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                MikaIcons.More, "编辑 ${bot.name}", tint = Hq.ink2,
+                modifier = Modifier.size(16.dp).clickable { onEdit(bot) },
+            )
+        }
     }
 }

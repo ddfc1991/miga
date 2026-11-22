@@ -655,6 +655,7 @@ private fun MikaRoot(
                 onMoreEntry = { entry ->
                     when (entry.id) {
                         "bots" -> nav.push(Route.Bots)
+                        "persona" -> nav.push(Route.Persona)
                         "settings" -> nav.push(Route.Settings)
                         "models" -> nav.push(Route.Models)
                         "groups" -> nav.push(Route.ModelGroups)
@@ -704,6 +705,7 @@ private fun MikaRoot(
                 nav.push(Route.Chat)
             },
             onManageBots = { nav.push(Route.Persona) },
+            onEditBot = { nav.push(Route.Persona) },
         )
         Route.Vault -> VaultScreen(onBack = back)
         Route.GroupChats -> {

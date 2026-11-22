@@ -93,6 +93,7 @@ fun HqMoreScreen(
 
         HqMenuGroup("系统", listOf(
             HqMoreEntry("bots", "机器人", MikaIcons.Spark, Hq.accent),
+            HqMoreEntry("persona", "人格", MikaIcons.Spark, Color(0xFF30B0C7)),
             HqMoreEntry("settings", "设置", MikaIcons.Gear, Hq.ink2),
             HqMoreEntry("models", "模型", MikaIcons.Star, Hq.accent),
             HqMoreEntry("groups", "模型组", MikaIcons.Apps, Hq.accent),
