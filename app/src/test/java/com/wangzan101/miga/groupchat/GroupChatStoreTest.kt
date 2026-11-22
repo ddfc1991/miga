@@ -29,9 +29,11 @@ class GroupChatStoreTest {
         assertTrue(File(dir, "groupchats.json").readText().contains("\"version\": 1"))
     }
 
-    @Test fun blankTitleFallsBackToMemberNames() {
+    @Test fun blankTitleFallsBackToDefaultName() {
         val a = store(tmp.newFolder("g2"))
-        assertEquals("小柯、老严", a.create("  ", members()).title)
+        // 群名不再由成员名拼接(会和成员列表重复),空白标题落成「新群聊」。
+        assertEquals("新群聊", a.create("  ", members()).title)
+        assertEquals("自定义", a.create(" 自定义 ", members()).title)
     }
 
     @Test fun appendKeepsOrderAndSurvivesReload() {
