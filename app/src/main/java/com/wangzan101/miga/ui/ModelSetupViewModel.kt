@@ -1001,9 +1001,16 @@ class ModelSetupViewModel(
         sync()
     }
 
+    /** 把模型组设为指定角色的用途（首成员主模型 + 其余备援 + 组策略轮询）。 */
+    fun useGroup(role: ModelRole, group: com.wangzan101.miga.settings.ModelGroup) {
+        scope.launch {
+            withContext(io) { store.useGroup(role, group) }
+            _state.update { snapshot(it) }
+        }
+    }
+
     /** 把 [providerId] 下的 [model] 用作 [role](选择页和「用作」面板都走这里):没有配置的当场建一条。 */
-    fun pick(role: ModelRole, providerId: String, model: String) {
-        val m = model.trim()
+    fun pick(role: ModelRole, providerId: String, model: String) {        val m = model.trim()
         if (m.isEmpty()) return
         scope.launch {
             withContext(io) {

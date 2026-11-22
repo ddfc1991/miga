@@ -1,6 +1,9 @@
 package com.wangzan101.miga.ui.hq
 
 import androidx.compose.foundation.background
+import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -295,6 +298,31 @@ fun HqFeedScreen(
     modifier: Modifier = Modifier,
 ) {
     val today = remember { java.text.SimpleDateFormat("M月d日", java.util.Locale.getDefault()).format(java.util.Date()) }
+    val context = LocalContext.current
+    val follow = remember { FollowStore(context) }
+    val points by follow.points.collectAsState()
+    var showFollow by remember { mutableStateOf(false) }
+    var showSearch by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+
+    // 关注管理弹窗
+    if (showFollow) {
+        FollowManageDialog(points = points, onAdd = { follow.add(it) }, onRemove = { follow.remove(it) }, onDismiss = { showFollow = false })
+    }
+    // 搜索弹窗
+    if (showSearch) {
+        SearchDialog(query = query, onQuery = { query = it }, onDismiss = { showSearch = false })
+    }
+
+    val q = query.trim().lowercase()
+    val visiblePosts = if (q.isEmpty()) posts else posts.mapNotNull { post ->
+        val groups = post.groups.mapNotNull { g ->
+            val items = g.items.filter { it.t.lowercase().contains(q) || it.b.lowercase().contains(q) || it.s?.lowercase()?.contains(q) == true }
+            if (items.isEmpty()) null else g.copy(items = items)
+        }
+        if (groups.isEmpty()) null else post.copy(groups = groups)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -317,16 +345,25 @@ fun HqFeedScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Search, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+                Icon(MikaIcons.ListPlus, "编辑关注", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showFollow = true })
+                Icon(MikaIcons.Search, "搜索动态", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showSearch = true })
             }
         }
         Spacer(Modifier.height(16.dp))
 
-        if (posts.isEmpty()) {
-            Text("还没有动态——agent 按你的关注生成后会出现在这里", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
+        if (q.isNotEmpty()) {
+            Text("搜索「$query」", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page))
+            Spacer(Modifier.height(8.dp))
+        }
+
+        if (visiblePosts.isEmpty()) {
+            Text(
+                if (q.isNotEmpty()) "没有匹配的动态" else "还没有动态——agent 按你的关注生成后会出现在这里",
+                style = HqType.Caption, color = Hq.ink3,
+                modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp),
+            )
         } else {
-            posts.forEach { post ->
+            visiblePosts.forEach { post ->
                 // butler（短信管家）来源 tag，默认折叠提示
                 if (post.source == "butler") {
                     Row(
@@ -391,6 +428,71 @@ fun HqFeedScreen(
         }
         Spacer(Modifier.height(80.dp))
     }
+}
+
+/** 关注点管理弹窗：列表 + 添加（名称/信源/关键词）+ 删除。 */
+@Composable
+private fun FollowManageDialog(
+    points: List<FollowPoint>,
+    onAdd: (FollowPoint) -> Unit,
+    onRemove: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var source by remember { mutableStateOf("") }
+    var keyword by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                if (name.isNotBlank()) onAdd(FollowPoint(name.trim(), source.trim(), keyword.trim()))
+                name = ""; source = ""; keyword = ""
+            }) { Text("添加", color = Hq.accent) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("关闭", color = Hq.ink3) } },
+        title = { Text("关注点", color = Hq.ink) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()).height(360.dp)) {
+                // 添加表单
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("名称（如 赛博羊毛）") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(value = source, onValueChange = { source = it }, label = { Text("信源（可空，如 NodeSeek / V2EX / URL）") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(value = keyword, onValueChange = { keyword = it }, label = { Text("关键词（可空）") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(12.dp))
+                Text("已关注 ${points.size}", style = HqType.Caption, color = Hq.ink2)
+                Spacer(Modifier.height(4.dp))
+                points.forEach { p ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(p.name, style = HqType.Body, color = Hq.ink)
+                            val sub = listOf(p.source, p.keyword).filter { it.isNotBlank() }.joinToString(" · ")
+                            if (sub.isNotBlank()) Text(sub, style = HqType.Caption, color = Hq.ink2)
+                        }
+                        TextButton(onClick = { onRemove(p.name) }) { Text("删除", color = Hq.warn) }
+                    }
+                }
+                if (points.isEmpty()) Text("还没有关注点——agent 会按信源/关键词生成动态", style = HqType.Caption, color = Hq.ink3)
+            }
+        },
+    )
+}
+
+/** 搜索弹窗：输入关键词过滤当前动态。 */
+@Composable
+private fun SearchDialog(query: String, onQuery: (String) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text("完成", color = Hq.accent) } },
+        title = { Text("搜索动态", color = Hq.ink) },
+        text = {
+            OutlinedTextField(value = query, onValueChange = onQuery, label = { Text("关键词") },
+                singleLine = true, modifier = Modifier.fillMaxWidth())
+        },
+    )
 }
 
 private fun relTime(ms: Long): String {

@@ -696,8 +696,28 @@ class ProviderStore(
         return true
     }
 
-    /** 保持旧方法签名完全兼容 */
+    /**
+     * 把模型组 [group] 设为 [role] 的用途：首成员当主模型，其余成员按组内顺序当备援链，
+     * 组策略 loadBalance 时开启主模型备援链轮询（Mibot RoutingStrategy 那套）。
+     * 返回是否成功（组为空或成员配置建不出来返回 false）。
+     */
     @Synchronized
+    fun useGroup(role: ModelRole, group: ModelGroup): Boolean {
+        if (group.members.isEmpty()) return false
+        val ids = group.members.mapNotNull { m ->
+            val p = provider(m.providerId) ?: return@mapNotNull null
+            ensureConfigId(p.id, m.modelId, ModelOptions.baseOf(p))
+        }
+        if (ids.isEmpty()) return false
+        // 首成员当主模型（Main 角色记 toolCalls）
+        if (!choose(role, RoleChoice.Model(ids.first()))) return false
+        // 其余成员依次当备援链
+        val rest = ids.drop(1)
+        rest.forEachIndexed { i, cid -> setFallback(role, i, cid) }
+        // 组策略 loadBalance → 主模型备援链轮询
+        if (role == ModelRole.Main) setMainLoadBalance(group.strategy == "loadBalance")
+        return true
+    }
     fun setMainFallback(slot: Int, configId: String?): Boolean = setFallback(ModelRole.Main, slot, configId)
 
     /** 只改这个用途;不支持的协议、跟随主模型的用途或列表明确不支持的档位不接受。 */
