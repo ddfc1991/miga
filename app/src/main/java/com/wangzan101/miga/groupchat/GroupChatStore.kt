@@ -16,6 +16,8 @@ data class GroupMember(
     val prompt: String = "",
     /** 来源人格;人格删了不影响群(名字和提示词已抄一份)。 */
     val personaId: String = "",
+    /** 这位成员单独用的模型配置;空表示跟随群设置。 */
+    val configId: String? = null,
 )
 
 /** 群里的一条消息。[fromBot] 表示是某个成员说的,否则是用户说的。 */
@@ -68,6 +70,12 @@ class GroupChatStore(private val dir: File) {
     fun append(id: String, message: GroupMessage) {
         if (_chats.value.none { it.id == id }) return
         save(_chats.value.map { if (it.id == id) it.copy(messages = it.messages + message) else it })
+    }
+
+    /** 群用的模型配置;null 表示回到群设置里选的那个,再没有就用主模型。 */
+    @Synchronized
+    fun setConfig(id: String, configId: String?) {
+        save(_chats.value.map { if (it.id == id) it.copy(configId = configId) else it })
     }
 
     @Synchronized

@@ -699,6 +699,7 @@ private fun MikaRoot(
                 store = app.groupChats,
                 personas = app.personas.personas.collectAsState().value,
                 runner = groupRunner,
+                providers = app.providers,
             )
         }
         Route.Plugins -> PluginsScreen(app.plugins, onBack = back)

@@ -2,6 +2,8 @@ package com.wangzan101.miga.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -43,6 +46,8 @@ import com.wangzan101.miga.groupchat.GroupChatStore
 import com.wangzan101.miga.groupchat.GroupMember
 import com.wangzan101.miga.groupchat.GroupMessage
 import com.wangzan101.miga.settings.Persona
+import com.wangzan101.miga.settings.ProviderConfig
+import com.wangzan101.miga.settings.ProviderStore
 import com.wangzan101.miga.ui.components.GroupCard
 import com.wangzan101.miga.ui.components.GroupLabel
 import com.wangzan101.miga.ui.components.ListRow
@@ -74,13 +79,17 @@ fun GroupChatsScreen(
     store: GroupChatStore? = null,
     personas: List<Persona> = emptyList(),
     runner: GroupChatRunner? = null,
+    providers: ProviderStore? = null,
 ) {
     var openId by remember { mutableStateOf<String?>(null) }
     val chats by (store?.chats?.collectAsState() ?: remember { mutableStateOf(emptyList<GroupChat>()) })
     val open = chats.firstOrNull { it.id == openId }
 
     if (store != null && open != null) {
-        GroupChatView(chat = open, store = store, runner = runner, onBack = { openId = null })
+        GroupChatView(
+            chat = open, store = store, runner = runner, providers = providers,
+            onBack = { openId = null },
+        )
         return
     }
     GroupChatList(
@@ -251,6 +260,7 @@ private fun GroupChatView(
     chat: GroupChat,
     store: GroupChatStore,
     runner: GroupChatRunner?,
+    providers: ProviderStore?,
     onBack: () -> Unit,
 ) {
     val c = MikaTheme.colors
@@ -259,6 +269,7 @@ private fun GroupChatView(
     var input by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var settingsOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(chat.messages.size) {
         if (chat.messages.isNotEmpty()) listState.animateScrollToItem(chat.messages.size - 1)
@@ -295,6 +306,9 @@ private fun GroupChatView(
                 onLeft = onBack,
                 leftLabel = "返回",
                 subtitle = chat.members.joinToString("、") { it.name }.ifBlank { "没有成员" },
+                right = {
+                    TextButton(onClick = { settingsOpen = true }) { Text("设置", color = c.accent) }
+                },
             )
             LazyColumn(
                 state = listState,
@@ -351,6 +365,93 @@ private fun GroupChatView(
                 }
             }
         }
+    }
+
+    if (settingsOpen) {
+        GroupSettingsDialog(
+            chat = chat,
+            store = store,
+            providers = providers,
+            onDismiss = { settingsOpen = false },
+            onDeleted = { settingsOpen = false; onBack() },
+        )
+    }
+}
+
+@Composable
+private fun GroupSettingsDialog(
+    chat: GroupChat,
+    store: GroupChatStore,
+    providers: ProviderStore?,
+    onDismiss: () -> Unit,
+    onDeleted: () -> Unit,
+) {
+    val c = MikaTheme.colors
+    val configs by (providers?.configs?.collectAsState() ?: remember { mutableStateOf(emptyList<ProviderConfig>()) })
+    var title by remember(chat.id) { mutableStateOf(chat.title) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    val current = chat.configId
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("群设置") },
+        text = {
+            Column(Modifier.heightIn(max = 380.dp).verticalScroll(rememberScrollState())) {
+                OutlinedTextField(
+                    value = title, onValueChange = { title = it },
+                    label = { Text("群名") }, singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        TextButton(
+                            enabled = title.trim().isNotEmpty() && title.trim() != chat.title,
+                            onClick = { store.rename(chat.id, title) },
+                        ) { Text("保存") }
+                    },
+                )
+                Spacer(Modifier.height(MikaSpace.S16))
+                Text("这个群用哪个模型", style = MikaType.Caption, color = c.ink3)
+                ModelChoice("跟随设置(主模型)", selected = current == null) { store.setConfig(chat.id, null) }
+                configs.forEach { cfg ->
+                    val label = listOfNotNull(cfg.name.takeIf { it.isNotBlank() }, cfg.model)
+                        .joinToString(" / ")
+                    ModelChoice(label, selected = current == cfg.id) { store.setConfig(chat.id, cfg.id) }
+                }
+                if (configs.isEmpty()) {
+                    Text("还没有可选的模型,先去「设置 → 模型」配一个。", style = MikaType.Caption, color = c.ink3)
+                }
+                Spacer(Modifier.height(MikaSpace.S16))
+                Text("成员", style = MikaType.Caption, color = c.ink3)
+                chat.members.forEach { m ->
+                    Column(Modifier.padding(vertical = 4.dp)) {
+                        Text(m.name, style = MikaType.Body, color = c.ink)
+                        if (m.prompt.isNotBlank()) Text(m.prompt, style = MikaType.Caption, color = c.ink3)
+                    }
+                }
+                Spacer(Modifier.height(MikaSpace.S16))
+                TextButton(onClick = { store.clear(chat.id) }) { Text("清空消息", color = c.warn) }
+                TextButton(onClick = { confirmDelete = true }) { Text("删除群聊", color = c.bad) }
+                if (confirmDelete) {
+                    Text("确定删除「${chat.title}」?消息记录会一起删掉。", style = MikaType.Caption, color = c.bad)
+                    Row {
+                        TextButton(onClick = { store.remove(chat.id); onDeleted() }) { Text("确定删除", color = c.bad) }
+                        TextButton(onClick = { confirmDelete = false }) { Text("取消") }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } },
+    )
+}
+
+@Composable
+private fun ModelChoice(label: String, selected: Boolean, onClick: () -> Unit) {
+    val c = MikaTheme.colors
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(vertical = 4.dp),
+    ) {
+        Text(if (selected) "●" else "○", color = if (selected) c.accent else c.ink3, modifier = Modifier.width(20.dp))
+        Text(label, style = MikaType.Body, color = if (selected) c.ink else c.ink2)
     }
 }
 

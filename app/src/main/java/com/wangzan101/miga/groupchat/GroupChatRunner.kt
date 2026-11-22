@@ -17,7 +17,8 @@ class GroupChatRunner(private val providers: ProviderStore) {
     fun ready(): Boolean = providers.modelFor(ModelRole.Main) != null
 
     suspend fun ask(member: GroupMember, chat: GroupChat): Result<String> = runCatching {
-        val model = chat.configId?.let { providers.modelForConfig(it) }
+        val model = member.configId?.let { providers.modelForConfig(it) }
+            ?: chat.configId?.let { providers.modelForConfig(it) }
             ?: providers.modelFor(ModelRole.Main)
             ?: error("还没有可用模型,先到「设置 → 模型」里选一个主模型")
         val others = chat.members.filter { it.name != member.name }.joinToString("、") { it.name }
