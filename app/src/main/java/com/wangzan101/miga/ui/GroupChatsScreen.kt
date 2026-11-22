@@ -2,6 +2,7 @@ package com.wangzan101.miga.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -291,9 +292,12 @@ private fun GroupChatView(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var settingsOpen by remember { mutableStateOf(false) }
+    var focusMember by remember(chat.id) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(chat.messages.size) {
-        if (chat.messages.isNotEmpty()) listState.animateScrollToItem(chat.messages.size - 1)
+        val lastMsg = if (focusMember == null) chat.messages
+        else chat.messages.filter { it.fromBot && it.author == focusMember }
+        if (lastMsg.isNotEmpty()) listState.animateScrollToItem(lastMsg.size - 1)
     }
 
     fun send() {
@@ -332,21 +336,36 @@ private fun GroupChatView(
                     TextButton(onClick = { settingsOpen = true }) { Text("设置", color = c.accent) }
                 },
             )
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                    .padding(horizontal = MikaSpace.Page, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                MemberTab("全部", focusMember == null) { focusMember = null }
+                chat.members.forEach { m ->
+                    MemberTab(m.name, focusMember == m.name) {
+                        focusMember = if (focusMember == m.name) null else m.name
+                    }
+                }
+            }
+            val shownMessages = if (focusMember == null) chat.messages
+            else chat.messages.filter { it.fromBot && it.author == focusMember }
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = MikaSpace.Page),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (chat.messages.isEmpty()) {
+                if (shownMessages.isEmpty()) {
                     item {
                         Text(
-                            "给这个群发第一条消息,${chat.members.size} 位成员会依次回你。",
+                            if (focusMember == null) "给这个群发第一条消息,${chat.members.size} 位成员会依次回你。"
+                            else "「$focusMember」还没说过话。",
                             style = MikaType.Caption, color = c.ink3,
                             modifier = Modifier.padding(vertical = MikaSpace.S8),
                         )
                     }
                 }
-                items(chat.messages) { m ->
+                items(shownMessages) { m ->
                     GroupBubble(message = m, isUser = !m.fromBot)
                 }
                 if (busy) {
@@ -540,6 +559,21 @@ private fun ModelChoice(label: String, selected: Boolean, onClick: () -> Unit) {
         Text(if (selected) "●" else "○", color = if (selected) c.accent else c.ink3, modifier = Modifier.width(20.dp))
         Text(label, style = MikaType.Body, color = if (selected) c.ink else c.ink2)
     }
+}
+
+@Composable
+private fun MemberTab(label: String, selected: Boolean, onClick: () -> Unit) {
+    val c = MikaTheme.colors
+    Text(
+        label,
+        style = MikaType.Caption,
+        color = if (selected) c.onAccent else c.ink2,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) c.accent else c.fill)
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    )
 }
 
 @Composable
