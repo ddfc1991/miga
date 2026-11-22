@@ -1,5 +1,6 @@
 package com.wangzan101.miga.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,8 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -177,30 +181,44 @@ private fun GroupMembersView(
         val available = allModels.filter { (p, mid, _) ->
             group.members.none { it.providerId == p.id && it.modelId == mid }
         }
+        var picked by remember { mutableStateOf(setOf<Pair<String, String>>()) }
         AlertDialog(
             onDismissRequest = { showPicker = false },
             confirmButton = {
-                TextButton(onClick = { showPicker = false }) { Text(stringResource(R.string.models_groups_cancel)) }
+                TextButton(onClick = {
+                    if (picked.isNotEmpty()) {
+                        val add = picked.map { (pid, mid) -> ModelGroupMember(pid, mid) }
+                        store.setMembers(group.id, group.members + add)
+                    }
+                    showPicker = false
+                }) {
+                    Text(if (picked.isEmpty()) stringResource(R.string.models_groups_cancel)
+                         else stringResource(R.string.models_groups_add_selected, picked.size), color = c.accent)
+                }
             },
-            title = { Text("添加模型") },
+            title = { Text(stringResource(R.string.models_groups_add)) },
             text = {
                 if (available.isEmpty()) {
-                    Text("没有可添加的模型——先连接服务商并列出模型。")
+                    Text(stringResource(R.string.models_groups_no_models))
                 } else {
-                    Column(Modifier.height(280.dp)) {
+                    Column(Modifier.height(280.dp).verticalScroll(rememberScrollState())) {
                         available.forEach { (p, mid, mName) ->
+                            val key = p.id to mid
+                            val on = picked.contains(key)
                             Row(
-                                Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                Modifier.fillMaxWidth()
+                                    .clickable { picked = if (on) picked - key else picked + key }
+                                    .padding(vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                Checkbox(
+                                    checked = on,
+                                    onCheckedChange = { picked = if (on) picked - key else picked + key },
+                                )
                                 Column(Modifier.weight(1f)) {
                                     Text(mName, style = MikaType.Body)
                                     Text(p.name, style = MikaType.Caption, color = c.ink2)
                                 }
-                                TextButton(onClick = {
-                                    store.setMembers(group.id, group.members + ModelGroupMember(p.id, mid))
-                                    showPicker = false
-                                }) { Text("添加", color = c.accent) }
                             }
                         }
                     }

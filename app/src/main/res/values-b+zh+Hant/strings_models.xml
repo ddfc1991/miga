@@ -271,4 +271,6 @@
     <string name="models_groups_create">Create</string>
     <string name="models_groups_cancel">Cancel</string>
     <string name="models_groups_add">New group</string>
+    <string name="models_groups_add_selected">新增 %1$d 個</string>
+    <string name="models_groups_no_models">沒有可新增的模型——先連接服務商並列出模型。</string>
 </resources>

@@ -296,4 +296,6 @@
     <string name="models_groups_create">Create</string>
     <string name="models_groups_cancel">Cancel</string>
     <string name="models_groups_add">New group</string>
+    <string name="models_groups_add_selected">Add %1$d</string>
+    <string name="models_groups_no_models">No models to add — connect a provider and list models first.</string>
 </resources>
