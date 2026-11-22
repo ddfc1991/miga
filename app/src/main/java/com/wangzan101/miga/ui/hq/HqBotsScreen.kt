@@ -2,6 +2,12 @@ package com.wangzan101.miga.ui.hq
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,30 +50,44 @@ data class HqBot(
 )
 
 /** 顶排 3 个置顶大 blob（pebble 55dp + 名称）。 */
+/** 圆泡堆叠选择器(技巧 007):选项是大小不一的圆、紧密堆叠;
+ *  点一下选中(放大、填充主色),周围的圆被挤开;再点选中的圆打开对话。 */
 @Composable
-fun HqTopPebbles(
+fun HqPebblePicker(
     bots: List<HqBot>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
     onOpen: (HqBot) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = HqSpace.Page),
-        horizontalArrangement = Arrangement.spacedBy(28.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = HqSpace.Page),
+        horizontalArrangement = Arrangement.spacedBy((-14).dp),
     ) {
-        bots.forEach { bot ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    modifier = Modifier
-                        .size(55.dp)
-                        .clip(HqShape.Capsule)
-                        .background(Hq.pebble(bot.name))
-                        .clickable { onOpen(bot) },
-                ) { PebbleAvatar(bot.name, Modifier.fillMaxSize()) }
-                Spacer(Modifier.height(8.dp))
-                Text(bot.name, style = HqType.Caption, color = Hq.ink3, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        bots.forEachIndexed { i, bot ->
+            val sel = selected == i
+            val scale by animateFloatAsState(if (sel) 1.18f else 0.94f, label = "pebble-scale")
+            val fill by animateColorAsState(
+                if (sel) Hq.accent else Hq.pebble(bot.name), label = "pebble-fill",
+            )
+            Box(
+                modifier = Modifier
+                    .size(if (sel) 66.dp else 50.dp)
+                    .zIndex(if (sel) 2f else if (selected >= 0) 0f else 0f)
+                    .graphicsLayer { scaleX = scale; scaleY = scale }
+                    .clip(CircleShape)
+                    .background(fill)
+                    .clickable {
+                        if (sel) onOpen(bot) else onSelect(i)
+                    },
+            ) {
+                PebbleAvatar(bot.name, Modifier.fillMaxSize())
+                if (sel) {
+                    Text(
+                        "再点打开", style = HqType.Caption, color = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.align(Alignment.Center).offset(y = 4.dp),
+                    )
+                }
             }
         }
     }
@@ -84,6 +104,7 @@ fun HqBotsScreen(
 ) {
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    var pickedBot by remember { mutableStateOf(0) }
     val q = query.trim()
     val shown = if (q.isEmpty()) personas else personas.filter {
         it.name.contains(q, ignoreCase = true) || it.description.contains(q, ignoreCase = true)
@@ -149,7 +170,13 @@ fun HqBotsScreen(
         }
 
         Spacer(Modifier.height(20.dp))
-        HqTopPebbles(listOf(mainBot), onOpenBot)
+        val pickBots = listOf(mainBot) + botList
+        HqPebblePicker(
+            bots = pickBots,
+            selected = pickedBot,
+            onSelect = { pickedBot = it },
+            onOpen = onOpenBot,
+        )
         Spacer(Modifier.height(24.dp))
 
         if (botList.isEmpty()) {
