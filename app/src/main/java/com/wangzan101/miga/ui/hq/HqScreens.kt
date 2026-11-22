@@ -48,10 +48,25 @@ fun HqSessionsScreen(
     sessions: List<ConversationSummary> = emptyList(),
     onOpenSession: (ConversationSummary) -> Unit = {},
     onDeleteSession: (String) -> Unit = {},
+    onNewSession: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var deleteConfirm by remember { mutableStateOf<String?>(null) }
     var dissolving by remember { mutableStateOf<String?>(null) }
+    var query by remember { mutableStateOf("") }
+    var showHelp by remember { mutableStateOf(false) }
+    val q = query.trim().lowercase()
+    val visible = if (q.isEmpty()) sessions else sessions.filter {
+        it.title.lowercase().contains(q)
+    }
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            confirmButton = { TextButton(onClick = { showHelp = false }) { Text("知道了", color = Hq.accent) } },
+            title = { Text("会话", color = Hq.ink) },
+            text = { Text("点会话继续聊；行尾 ⋯ 删除（溶解动效）。「+」开新会话，「放大镜」搜索。", color = Hq.ink2) },
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -80,17 +95,21 @@ fun HqSessionsScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Search, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Edit, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+                Icon(MikaIcons.ListPlus, "新建会话", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { onNewSession() })
+                Icon(MikaIcons.Search, "搜索会话", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showHelp = true; query = "" })
+                Icon(MikaIcons.Edit, "帮助", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showHelp = true })
             }
         }
         Spacer(Modifier.height(16.dp))
 
-        if (sessions.isEmpty()) {
-            Text("还没有会话", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
+        if (visible.isEmpty()) {
+            Text(
+                if (q.isNotEmpty()) "没有匹配的会话" else "还没有会话",
+                style = HqType.Caption, color = Hq.ink3,
+                modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp),
+            )
         } else {
-            sessions.forEach { s ->
+            visible.forEach { s ->
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -157,6 +176,19 @@ fun HqJobsScreen(
     onOpenRun: (RunSummary) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    var query by remember { mutableStateOf("") }
+    var showHelp by remember { mutableStateOf(false) }
+    val q = query.trim().lowercase()
+    val visibleJobs = if (q.isEmpty()) jobs else jobs.filter { it.goal.lowercase().contains(q) }
+    val visibleRuns = if (q.isEmpty()) runs else runs.filter { it.goal.lowercase().contains(q) }
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            confirmButton = { TextButton(onClick = { showHelp = false }) { Text("知道了", color = Hq.accent) } },
+            title = { Text("任务", color = Hq.ink) },
+            text = { Text("这里是 agent 活动流：运行中任务置顶，下面是运行历史（目标/时间/结局）。「+」发任务，「放大镜」搜索。", color = Hq.ink2) },
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -181,17 +213,21 @@ fun HqJobsScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Search, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+                Icon(MikaIcons.ListPlus, "发任务", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showHelp = true })
+                Icon(MikaIcons.Search, "搜索任务", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showHelp = true; query = "" })
             }
         }
         Spacer(Modifier.height(16.dp))
 
-        if (jobs.isEmpty() && runs.isEmpty()) {
-            Text("还没有任务——去对话里跟 Miga 聊聊吧", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
+        if (visibleJobs.isEmpty() && visibleRuns.isEmpty()) {
+            Text(
+                if (q.isNotEmpty()) "没有匹配的任务" else "还没有任务——去对话里跟 Miga 聊聊吧",
+                style = HqType.Caption, color = Hq.ink3,
+                modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp),
+            )
         } else {
             // 运行中任务置顶
-            jobs.forEach { job ->
+            visibleJobs.forEach { job ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -216,7 +252,7 @@ fun HqJobsScreen(
                 Text("历史", style = HqType.RowTitle, color = Hq.ink2, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 8.dp))
             }
             // 运行历史（agent 活动流主体）
-            runs.forEach { run ->
+            visibleRuns.forEach { run ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -244,6 +280,15 @@ fun HqJobsScreen(
 /** Kanban 屏：Miga 运行中任务卡片。 */
 @Composable
 fun HqKanbanScreen(tasks: List<TaskRun> = emptyList(), onOpenTask: (TaskRun) -> Unit = {}, modifier: Modifier = Modifier) {
+    var showHelp by remember { mutableStateOf(false) }
+    if (showHelp) {
+        AlertDialog(
+            onDismissRequest = { showHelp = false },
+            confirmButton = { TextButton(onClick = { showHelp = false }) { Text("知道了", color = Hq.accent) } },
+            title = { Text("看板", color = Hq.ink) },
+            text = { Text("这是 Miga 运行中任务卡片（Blocked/Triage/Todo 列）。「+」发新任务：去对话页跟 Miga 说目标即可。", color = Hq.ink2) },
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -261,7 +306,7 @@ fun HqKanbanScreen(tasks: List<TaskRun> = emptyList(), onOpenTask: (TaskRun) -> 
                 Text("看板", style = HqType.ScreenTitle, color = Hq.ink)
                 Text("Miga 任务", style = HqType.Caption, color = Hq.ink)
             }
-            Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+            Icon(MikaIcons.ListPlus, "发任务", tint = Hq.ink, modifier = Modifier.size(20.dp).clickable { showHelp = true })
             Spacer(Modifier.width(16.dp))
             Icon(MikaIcons.Info, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
         }

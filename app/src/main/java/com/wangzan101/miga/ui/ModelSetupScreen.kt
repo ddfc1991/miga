@@ -45,6 +45,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import com.wangzan101.miga.settings.ModelGroup
+import com.wangzan101.miga.settings.ModelGroupStore
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -404,6 +406,11 @@ fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetup
                                 first = true, onClick = openDecision) { RowChevron() }
                         }
                     }
+                    // 主模型可选模型组：首成员主模型 + 其余备援 + 组策略轮询（Mibot 那套）
+                    ModelGroupPickCard(
+                        store = (context.applicationContext as? MikaApp)?.modelGroups,
+                        onPickGroup = { g -> vm.useGroup(ModelRole.Main, g) },
+                    )
                     FallbackSection(ui, ModelRole.Main, actions.pickRoleFallback, actions.toggleMainLoadBalance)
                     FallbackSection(ui, ModelRole.Vision, actions.pickRoleFallback)
                     FallbackSection(ui, ModelRole.Light, actions.pickRoleFallback)
