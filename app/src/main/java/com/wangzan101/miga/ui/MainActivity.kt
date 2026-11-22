@@ -697,7 +697,13 @@ private fun MikaRoot(
         Route.Persona -> if (personasOn) PersonaScreen(app.personas, onBack = back) else LaunchedEffect(Unit) { nav.back() }
         Route.Bots -> HqBotsScreen(
             personas = app.personas.personas.collectAsState().value,
-            onOpenBot = { nav.push(Route.Chat) },
+            onOpenBot = { bot ->
+                // 点 bot 开一条新对话,并把它的身份(人格)带上;主智能体 personaId 为 null,走默认身份。
+                app.chat.newConversation()
+                bot.personaId?.let { app.chat.selectPersona(it) }
+                nav.push(Route.Chat)
+            },
+            onManageBots = { nav.push(Route.Persona) },
         )
         Route.Vault -> VaultScreen(onBack = back)
         Route.GroupChats -> {

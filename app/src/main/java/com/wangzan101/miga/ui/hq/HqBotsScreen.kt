@@ -17,8 +17,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +34,14 @@ import androidx.compose.ui.unit.dp
 import com.wangzan101.miga.ui.theme.MikaIcons
 
 /** Bots 屏的一个 bot。 */
-data class HqBot(val name: String, val group: String, val summary: String, val time: String)
+data class HqBot(
+    val name: String,
+    val group: String,
+    val summary: String,
+    val time: String,
+    /** 对应的人格 id;主智能体为 null(走默认身份)。 */
+    val personaId: String? = null,
+)
 
 /** 顶排 3 个置顶大 blob（pebble 55dp + 名称）。 */
 @Composable
@@ -67,10 +79,19 @@ fun HqBotsScreen(
     personas: List<com.wangzan101.miga.settings.Persona> = emptyList(),
     onOpenBot: (HqBot) -> Unit,
     modifier: Modifier = Modifier,
+    onManageBots: () -> Unit = {},
 ) {
+    var searching by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    val q = query.trim()
+    val shown = if (q.isEmpty()) personas else personas.filter {
+        it.name.contains(q, ignoreCase = true) || it.description.contains(q, ignoreCase = true)
+    }
     // 主 agent(本能全能) + 分出的 bot(personas 真实数据)
     val mainBot = HqBot("Miga", "主智能体", "本能全能 · 随时可分 bot 干活", "在线")
-    val botList = personas.map { HqBot(it.name, "分出的 bot", it.description.ifBlank { "自定义人格" }, "就绪") }
+    val botList = shown.map {
+        HqBot(it.name, "分出的 bot", it.description.ifBlank { "自定义人格" }, "就绪", it.id)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -101,15 +122,48 @@ fun HqBotsScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Search, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
-                Icon(MikaIcons.Edit, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+                Icon(
+                    MikaIcons.ListPlus, "新建 bot", tint = Hq.ink,
+                    modifier = Modifier.size(20.dp).clickable { onManageBots() },
+                )
+                Icon(
+                    MikaIcons.Search, "搜索 bot", tint = if (searching) Hq.accent else Hq.ink,
+                    modifier = Modifier.size(20.dp).clickable { searching = !searching },
+                )
+                Icon(
+                    MikaIcons.Edit, "管理 bot", tint = Hq.ink,
+                    modifier = Modifier.size(20.dp).clickable { onManageBots() },
+                )
             }
+        }
+
+        if (searching) {
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = query, onValueChange = { query = it },
+                placeholder = { Text("搜索 bot") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = HqSpace.Page),
+            )
         }
 
         Spacer(Modifier.height(20.dp))
         HqTopPebbles(listOf(mainBot), onOpenBot)
         Spacer(Modifier.height(24.dp))
+
+        if (botList.isEmpty()) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = HqSpace.Page, vertical = 24.dp)) {
+                Text(
+                    if (q.isEmpty()) "还没有分出的 bot" else "没有匹配「$q」的 bot",
+                    style = HqType.RowTitle, color = Hq.ink2,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    if (q.isEmpty()) "在「更多 → 人格」里建一个,它会出现在这里,点开就能单独对话。" else "换个关键词试试。",
+                    style = HqType.Body, color = Hq.ink3,
+                )
+            }
+        }
 
         // 分组列表:主智能体 + 分出的 bot
         listOf("主智能体" to listOf(mainBot), "分出的 bot" to botList).forEach { (group, items) ->
