@@ -691,7 +691,16 @@ private fun MikaRoot(
             onOpenBot = { nav.push(Route.Chat) },
         )
         Route.Vault -> VaultScreen(onBack = back)
-        Route.GroupChats -> GroupChatsScreen(onBack = back, onNew = { nav.push(Route.Chat) })
+        Route.GroupChats -> {
+            val groupRunner = remember { com.wangzan101.miga.groupchat.GroupChatRunner(app.providers) }
+            GroupChatsScreen(
+                onBack = back,
+                onNew = { nav.push(Route.Chat) },
+                store = app.groupChats,
+                personas = app.personas.personas.collectAsState().value,
+                runner = groupRunner,
+            )
+        }
         Route.Plugins -> PluginsScreen(app.plugins, onBack = back)
         Route.Usage -> UsageScreen(app.usage, store, onBack = back, onOpenUrl = { openInBrowser(context, it) })
         Route.SpeechModel -> SpeechModelScreen(store, onBack = back)

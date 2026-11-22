@@ -174,6 +174,8 @@ class MikaApp : Application(), WebOwner, SandboxOwner, TaskEnvironment.Owner, Ph
     val personas by lazy { com.wangzan101.miga.settings.PersonaStore(java.io.File(filesDir, "settings")) }
     /** 模型组:模型分组管理(组名 + 成员),存 settings 目录。 */
     val modelGroups by lazy { com.wangzan101.miga.settings.ModelGroupStore(java.io.File(filesDir, "settings")) }
+    /** 群聊:多个 bot 同一会话轮流说话,存 settings 目录。 */
+    val groupChats by lazy { com.wangzan101.miga.groupchat.GroupChatStore(java.io.File(filesDir, "settings")) }
     override val tabBudget get() = resources.tabBudget
 
     /** 任务结束后留在后台接着运行的那一页;关掉时在来源对话那一轮记下原因(对话页那一轮下面显示「后台网页已关闭」)。 */
