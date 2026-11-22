@@ -76,6 +76,7 @@ import com.wangzan101.miga.cap.phone.setup.DeveloperSettings
 import com.wangzan101.miga.cap.phone.setup.PairingNotifier
 import com.wangzan101.miga.core.shell.BuiltinShellStatus
 import com.wangzan101.miga.core.knowledge.GuideCatalog
+import com.wangzan101.miga.ui.hq.FeedStore
 import com.wangzan101.miga.ui.hq.HqBotsScreen
 import com.wangzan101.miga.ui.hq.HqShell
 import com.wangzan101.miga.ui.theme.MikaTheme
@@ -554,6 +555,7 @@ private fun MikaRoot(
                 app.chat.refresh()
                 onStopOrDispose {}
             }
+            val feedStore = remember { FeedStore(context) }
             HqShell(
                 botsContent = {
             ChatWithDrawer(
@@ -639,10 +641,15 @@ private fun MikaRoot(
                 }
             }
                 },
-                sessions = { ConversationStore.shared(context).list() }(),
+                sessions = produceState(initialValue = ConversationStore.shared(context).list()) {
+                    ConversationStore.shared(context).changes.collect { value = ConversationStore.shared(context).list() }
+                }.value,
                 jobs = app.taskState.runs.value,
+                runs = remember { RunStore(context).list() },
+                posts = remember { feedStore.refresh(); feedStore.posts.value },
                 onOpenSession = { id -> nav.pushFromDrawer(Route.Chat); app.chat.openConversation(id) },
                 onDeleteSession = { id -> ConversationStore.shared(context).delete(id) },
+                onOpenUrl = { url -> openInBrowser(context, url) },
                 onMoreEntry = { entry ->
                     when (entry.id) {
                         "bots" -> nav.push(Route.Bots)

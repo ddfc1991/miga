@@ -36,15 +36,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.wangzan101.miga.ui.theme.MikaIcons
 import com.wangzan101.miga.chat.ConversationSummary
+import com.wangzan101.miga.record.RunSummary
 import com.wangzan101.miga.task.TaskRun
 
-/** Sessions 屏：Miga 真实会话列表。 */
+/** Sessions 屏：Miga 真实会话列表（长按/⋯ 删除，溶解动效）。 */
 @Composable
 fun HqSessionsScreen(
     sessions: List<ConversationSummary> = emptyList(),
     onOpenSession: (ConversationSummary) -> Unit = {},
+    onDeleteSession: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    var deleteConfirm by remember { mutableStateOf<String?>(null) }
+    var dissolving by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -84,14 +88,38 @@ fun HqSessionsScreen(
             Text("还没有会话", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
         } else {
             sessions.forEach { s ->
-                HqSessionRow(s, onClick = { onOpenSession(s) })
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    HqSessionRow(s, onClick = { onOpenSession(s) }, onDelete = { deleteConfirm = s.id })
+                    if (dissolving == s.id) {
+                        DissolveParticles(
+                            onDone = { onDeleteSession(s.id); dissolving = null },
+                            modifier = Modifier.matchParentSize(),
+                            color = Hq.ink,
+                        )
+                    }
+                }
             }
         }
+    }
+    deleteConfirm?.let { id ->
+        AlertDialog(
+            onDismissRequest = { deleteConfirm = null },
+            title = { Text("删除会话？") },
+            text = { Text("删除后聊天记录一并清除，无法恢复。") },
+            confirmButton = {
+                TextButton(onClick = { deleteConfirm = null; dissolving = id }) { Text("删除") }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteConfirm = null }) { Text("取消") }
+            },
+        )
     }
 }
 
 @Composable
-private fun HqSessionRow(s: ConversationSummary, onClick: () -> Unit = {}) {
+private fun HqSessionRow(s: ConversationSummary, onClick: () -> Unit = {}, onDelete: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,16 +138,22 @@ private fun HqSessionRow(s: ConversationSummary, onClick: () -> Unit = {}) {
             Text("点击打开", style = HqType.Caption, color = Hq.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.width(8.dp))
-        Icon(MikaIcons.More, null, tint = Hq.ink2, modifier = Modifier.size(16.dp))
+        Icon(MikaIcons.More, null, tint = Hq.ink2, modifier = Modifier.size(16.dp).clickable { onDelete() })
     }
 }
 
 private fun timeLabel(t: Long): String =
     if (t <= 0) "" else android.text.format.DateUtils.getRelativeTimeSpanString(t).toString()
 
-/** Jobs 屏：Miga 运行中任务。 */
+/** Jobs 屏：agent 活动流 = 运行中任务 + 运行历史（Muse 对齐）。 */
 @Composable
-fun HqJobsScreen(jobs: List<TaskRun> = emptyList(), onOpenJob: (TaskRun) -> Unit = {}, modifier: Modifier = Modifier) {
+fun HqJobsScreen(
+    jobs: List<TaskRun> = emptyList(),
+    runs: List<RunSummary> = emptyList(),
+    onOpenJob: (TaskRun) -> Unit = {},
+    onOpenRun: (RunSummary) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -135,7 +169,7 @@ fun HqJobsScreen(jobs: List<TaskRun> = emptyList(), onOpenJob: (TaskRun) -> Unit
         ) {
             Column(Modifier.weight(1f)) {
                 Text("任务", style = HqType.ScreenTitle, color = Hq.ink)
-                Text("Miga", style = HqType.Caption, color = Hq.ink2)
+                Text("agent 活动流", style = HqType.Caption, color = Hq.ink2)
             }
             Row(
                 modifier = Modifier
@@ -149,9 +183,11 @@ fun HqJobsScreen(jobs: List<TaskRun> = emptyList(), onOpenJob: (TaskRun) -> Unit
             }
         }
         Spacer(Modifier.height(16.dp))
-        if (jobs.isEmpty()) {
-            Text("没有运行中的任务", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
+
+        if (jobs.isEmpty() && runs.isEmpty()) {
+            Text("还没有任务——去对话里跟 Miga 聊聊吧", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
         } else {
+            // 运行中任务置顶
             jobs.forEach { job ->
                 Row(
                     modifier = Modifier
@@ -167,9 +203,34 @@ fun HqJobsScreen(jobs: List<TaskRun> = emptyList(), onOpenJob: (TaskRun) -> Unit
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(job.goal, style = HqType.RowTitle, color = Hq.ink)
-                        Text("运行中", style = HqType.Caption, color = Hq.ink2)
+                        Text("运行中", style = HqType.Caption, color = Hq.ok)
                     }
                     Text("进行中", style = HqType.Caption, color = Hq.ink3)
+                }
+                Spacer(Modifier.height(6.dp))
+            }
+            if (jobs.isNotEmpty() && runs.isNotEmpty()) {
+                Text("历史", style = HqType.RowTitle, color = Hq.ink2, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 8.dp))
+            }
+            // 运行历史（agent 活动流主体）
+            runs.forEach { run ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenRun(run) }
+                        .padding(horizontal = HqSpace.Page, vertical = 3.dp)
+                        .clip(HqShape.Card)
+                        .background(Hq.surface)
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(if (run.outcome == "ok") Hq.ok else Hq.warn))
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(run.goal, style = HqType.RowTitle, color = Hq.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(relTime(run.startedAtMs), style = HqType.Caption, color = Hq.ink2)
+                    }
+                    Text(run.outcome ?: "完成", style = HqType.Caption, color = Hq.ink3)
                 }
                 Spacer(Modifier.height(6.dp))
             }
@@ -227,16 +288,14 @@ fun HqKanbanScreen(tasks: List<TaskRun> = emptyList(), onOpenTask: (TaskRun) -> 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+/** 动态屏：Muse 信息茧房——agent 按你关注的社交/信源生成的分组帖子流。 */
+@Composable
 fun HqFeedScreen(
-    tasks: List<TaskRun> = emptyList(),
-    sessions: List<ConversationSummary> = emptyList(),
-    onOpenTask: (TaskRun) -> Unit = {},
-    onOpenSession: (String) -> Unit = {},
-    onDeleteSession: (String) -> Unit = {},
+    posts: List<FeedPost> = emptyList(),
+    onOpenUrl: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    var deleteConfirm by remember { mutableStateOf<String?>(null) }
-    var dissolving by remember { mutableStateOf<String?>(null) }
+    val today = remember { java.text.SimpleDateFormat("M月d日", java.util.Locale.getDefault()).format(java.util.Date()) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -250,82 +309,88 @@ fun HqFeedScreen(
         ) {
             Column(Modifier.weight(1f)) {
                 Text("动态", style = HqType.ScreenTitle, color = Hq.ink)
-                Text("只看你的 · agent 活动流", style = HqType.Caption, color = Hq.ink2)
+                Text("你关注的 · $today", style = HqType.Caption, color = Hq.ink2)
+            }
+            Row(
+                modifier = Modifier
+                    .clip(HqShape.Capsule)
+                    .background(Hq.surface)
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                Icon(MikaIcons.ListPlus, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
+                Icon(MikaIcons.Search, null, tint = Hq.ink, modifier = Modifier.size(20.dp))
             }
         }
         Spacer(Modifier.height(16.dp))
 
-        // 统一时间线（信息茧房：一条流全是你的活动）
-        val sorted = sessions.sortedByDescending { it.updatedAt }
-        if (tasks.isEmpty() && sorted.isEmpty()) {
-            Text("还没有动态——去对话里跟 Miga 聊聊吧", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
+        if (posts.isEmpty()) {
+            Text("还没有动态——agent 按你的关注生成后会出现在这里", style = HqType.Caption, color = Hq.ink3, modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 24.dp))
         } else {
-            tasks.forEach { task ->
-                Column(
-                    modifier = Modifier.fillMaxWidth().clickable { onOpenTask(task) }
-                        .padding(horizontal = HqSpace.Page, vertical = 5.dp)
-                        .clip(RoundedCornerShape(18.dp)).background(Hq.surface).padding(16.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(Color(0xFF34C759)))
-                        Spacer(Modifier.width(8.dp))
-                        Text("任务运行中", style = HqType.Caption, color = Hq.ink2)
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    Text(task.goal, style = HqType.RowTitle, color = Hq.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-            Text("动态", style = HqType.RowTitle, color = Hq.ink2, modifier = Modifier.padding(horizontal = HqSpace.Page))
-            Spacer(Modifier.height(8.dp))
-            sorted.forEach { s ->
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = HqSpace.Page, vertical = 6.dp),
-                ) {
+            posts.forEach { post ->
+                // butler（短信管家）来源 tag，默认折叠提示
+                if (post.source == "butler") {
                     Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .combinedClickable(
-                                onClick = { onOpenSession(s.id) },
-                                onLongClick = { deleteConfirm = s.id },
-                            )
-                            .clip(RoundedCornerShape(16.dp)).background(Hq.surface).padding(14.dp),
+                        modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 4.dp)
+                            .clip(RoundedCornerShape(8.dp)).background(Color(0x33FF9F0A)).padding(horizontal = 10.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(Hq.surface2), contentAlignment = Alignment.Center) {
-                            Text("💬", style = HqType.RowTitle)
-                        }
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(s.title.ifBlank { "未命名会话" }, style = HqType.RowTitle, color = Hq.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Spacer(Modifier.height(2.dp))
-                            Text(relTime(s.updatedAt), style = HqType.Caption, color = Hq.ink2)
-                        }
-                    }
-                    if (dissolving == s.id) {
-                        DissolveParticles(
-                            onDone = { onDeleteSession(s.id); dissolving = null },
-                            modifier = Modifier.matchParentSize(),
-                            color = Hq.ink,
-                        )
+                        Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(Hq.warn))
+                        Spacer(Modifier.width(6.dp))
+                        Text("管家提醒", style = HqType.Caption, color = Hq.warn)
                     }
                 }
+                post.groups.forEach { group ->
+                    // 分组悬浮小标签
+                    Text(
+                        group.h,
+                        style = HqType.Caption,
+                        color = Hq.ink2,
+                        modifier = Modifier.padding(horizontal = HqSpace.Page, vertical = 8.dp)
+                            .clip(RoundedCornerShape(6.dp)).background(Hq.surface2).padding(horizontal = 8.dp, vertical = 3.dp),
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    group.items.forEach { item ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = HqSpace.Page, vertical = 4.dp)
+                                .clip(HqShape.Card)
+                                .background(Hq.surface)
+                                .padding(16.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.Top) {
+                                Text(item.e, style = HqType.RowTitle)
+                                Spacer(Modifier.width(10.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(item.t, style = HqType.RowTitle, color = Hq.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                    if (item.b.isNotBlank()) {
+                                        Spacer(Modifier.height(6.dp))
+                                        Text(item.b, style = HqType.Body, color = Hq.ink2, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                                    }
+                                }
+                            }
+                            val link = item.s?.takeIf { it.startsWith("http://") || it.startsWith("https://") }
+                            if (link != null) {
+                                Spacer(Modifier.height(10.dp))
+                                Row(
+                                    modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { onOpenUrl(link) }
+                                        .background(Hq.surface2).padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text("🔗", style = HqType.Caption)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(link, style = HqType.Caption, color = Hq.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(6.dp))
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
             }
         }
         Spacer(Modifier.height(80.dp))
-    }
-    deleteConfirm?.let { id ->
-        AlertDialog(
-            onDismissRequest = { deleteConfirm = null },
-            title = { Text("删除会话？") },
-            text = { Text("删除后聊天记录一并清除，无法恢复。") },
-            confirmButton = {
-                TextButton(onClick = { deleteConfirm = null; dissolving = id }) { Text("删除") }
-            },
-            dismissButton = {
-                TextButton(onClick = { deleteConfirm = null }) { Text("取消") }
-            },
-        )
     }
 }
 

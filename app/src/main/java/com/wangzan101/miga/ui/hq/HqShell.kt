@@ -24,6 +24,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 import com.wangzan101.miga.chat.ConversationSummary
+import com.wangzan101.miga.record.RunSummary
 import com.wangzan101.miga.task.TaskRun
 
 /**
@@ -36,8 +37,11 @@ fun HqShell(
     botsContent: @Composable () -> Unit,
     sessions: List<ConversationSummary> = emptyList(),
     jobs: List<TaskRun> = emptyList(),
+    runs: List<RunSummary> = emptyList(),
+    posts: List<FeedPost> = emptyList(),
     onOpenSession: (String) -> Unit = {},
     onDeleteSession: (String) -> Unit = {},
+    onOpenUrl: (String) -> Unit = {},
     onMoreEntry: (HqMoreEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -55,9 +59,9 @@ fun HqShell(
             ) { t ->
                 when (t) {
                     HqTab.Bots -> botsContent()
-                    HqTab.Sessions -> HqSessionsScreen(sessions, onOpenSession = { onOpenSession(it.id) })
-                    HqTab.Jobs -> HqJobsScreen(jobs)
-                    HqTab.Kanban -> HqFeedScreen(tasks = jobs, sessions = sessions, onOpenSession = { onOpenSession(it) }, onDeleteSession = onDeleteSession)
+                    HqTab.Sessions -> HqSessionsScreen(sessions, onOpenSession = { onOpenSession(it.id) }, onDeleteSession = onDeleteSession)
+                    HqTab.Jobs -> HqJobsScreen(jobs = jobs, runs = runs, onOpenJob = {}, onOpenRun = {})
+                    HqTab.Kanban -> HqFeedScreen(posts = posts, onOpenUrl = onOpenUrl)
                     HqTab.More -> HqMoreScreen(onMoreEntry)
                 }
             }
