@@ -38,6 +38,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import com.wangzan101.miga.ui.components.MikaDialog
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -407,9 +408,10 @@ fun ModelSetupContent(ui: ModelSetupUi, onboarding: Boolean, actions: ModelSetup
                         }
                     }
                     // 主模型可选模型组：首成员主模型 + 其余备援 + 组策略轮询（Mibot 那套）
+                    val app = context.applicationContext as? MikaApp
                     ModelGroupPickCard(
-                        store = (context.applicationContext as? MikaApp)?.modelGroups,
-                        onPickGroup = { g -> vm.useGroup(ModelRole.Main, g) },
+                        groups = app?.modelGroups?.groups?.collectAsState()?.value.orEmpty(),
+                        onPickGroup = { g -> app?.modelGroups?.let { store -> vm.useGroup(ModelRole.Main, g) } },
                     )
                     FallbackSection(ui, ModelRole.Main, actions.pickRoleFallback, actions.toggleMainLoadBalance)
                     FallbackSection(ui, ModelRole.Vision, actions.pickRoleFallback)
@@ -1007,5 +1009,41 @@ object ModelSetupCopy {
         }
         if (caps.reasoning) add(tr(R.string.cap_reasoning) to false)
         if (o.contextKnown) add(ModelOptions.contextLabel(caps.contextTokens) to false)
+    }
+}
+
+/** 主模型「从模型组选」卡：列出全部模型组，点一个就把组设为主模型用途。 */
+@Composable
+private fun ModelGroupPickCard(
+    groups: List<ModelGroup>,
+    onPickGroup: (ModelGroup) -> Unit,
+) {
+    var showPicker by remember { mutableStateOf(false) }
+    ListRow(
+        icon = MikaIcons.Check,
+        title = "从模型组选主模型",
+        subtitle = if (groups.isEmpty()) "还没有模型组——先到「模型组」建一个" else "已建 ${groups.size} 个组，点选把组内模型设为主模型（首成员主模型+其余备援+组策略轮询）",
+        first = true,
+        onClick = { if (groups.isNotEmpty()) showPicker = true },
+    ) { RowChevron() }
+    if (showPicker) {
+        AlertDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {},
+            title = { Text("选模型组", color = MikaTheme.colors.ink) },
+            text = {
+                Column {
+                    groups.forEach { g ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { onPickGroup(g); showPicker = false }.padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(g.name, Modifier.weight(1f), style = MikaType.Body, color = MikaTheme.colors.ink)
+                            Text("${g.members.size} 模型", style = MikaType.Caption, color = MikaTheme.colors.ink3)
+                        }
+                    }
+                }
+            },
+        )
     }
 }
