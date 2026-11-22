@@ -32,7 +32,7 @@ class SelfCheckTextTest {
 
     @Test
     fun containsIgnoresCaseAndWhitespace() {
-        assertTrue(SelfCheckText.contains("MIKA 123", "MIGA 123"))
+        assertTrue(SelfCheckText.contains("MIKA 123", "mika  123"))
         assertTrue(SelfCheckText.contains("text  CLICKED 1 here", "Clicked 1"))
         assertFalse(SelfCheckText.contains("Clicked 0", "Clicked 1"))
     }
